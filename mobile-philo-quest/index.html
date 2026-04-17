@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PhiloQuest</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="hero">
+        <h1>🧠 PhiloQuest</h1>
+        <p>Learn philosophy like an adventure game.</p>
+      </header>
+
+      <section class="stats card">
+        <div>
+          <p class="label">Level</p>
+          <p id="level">1</p>
+        </div>
+        <div>
+          <p class="label">XP</p>
+          <p><span id="xp">0</span> / <span id="xpGoal">100</span></p>
+        </div>
+        <div>
+          <p class="label">Streak</p>
+          <p id="streak">0 🔥</p>
+        </div>
+      </section>
+
+      <section class="daily card">
+        <h2>Daily Quest</h2>
+        <p id="dailyQuest"></p>
+        <button id="completeQuest">Complete (+40 XP)</button>
+      </section>
+
+      <section class="card">
+        <h2>Quick Challenge</h2>
+        <p id="question"></p>
+        <div id="choices" class="choices"></div>
+      </section>
+
+      <section class="card">
+        <h2>Explore a Philosopher</h2>
+        <select id="philosopherSelect"></select>
+        <article id="philosopherCard"></article>
+      </section>
+
+      <section class="card">
+        <h2>Reflection Journal</h2>
+        <textarea id="journal" rows="4" placeholder="What idea changed your perspective today?"></textarea>
+        <button id="saveJournal">Save Reflection (+20 XP)</button>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

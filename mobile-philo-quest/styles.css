@@ -1,0 +1,101 @@
+:root {
+  --bg: #0d0f1a;
+  --card: #171a2b;
+  --accent: #8b5cf6;
+  --accent-2: #06b6d4;
+  --text: #eef2ff;
+  --muted: #a5b4fc;
+}
+
+* {
+  box-sizing: border-box;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, #1f2550, var(--bg));
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 1rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.hero {
+  text-align: center;
+}
+
+.hero h1 {
+  margin-bottom: 0.25rem;
+}
+
+.card {
+  background: color-mix(in oklab, var(--card) 88%, white 12%);
+  border: 1px solid #2c335e;
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  text-align: center;
+}
+
+.label {
+  color: var(--muted);
+  font-size: 0.75rem;
+  margin-bottom: 0.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+button {
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  padding: 0.75rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: white;
+}
+
+button:hover {
+  filter: brightness(1.05);
+}
+
+.choices {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.choice {
+  text-align: left;
+  background: #2a315f;
+}
+
+textarea,
+select {
+  width: 100%;
+  background: #0f1330;
+  border: 1px solid #2c335e;
+  border-radius: 10px;
+  color: var(--text);
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+#philosopherCard h3 {
+  margin-bottom: 0.25rem;
+}
+
+#philosopherCard p {
+  color: #d9e0ff;
+}
