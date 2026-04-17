@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Relationship Level-Up Game</title>
+  <style>
+    :root {
+      --bg: #11131a;
+      --card: #1a1f2b;
+      --accent: #ff4fa3;
+      --accent-2: #7f7bff;
+      --text: #f2f4fb;
+      --muted: #b8c0d9;
+      --success: #2ed38b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: radial-gradient(circle at top, #23283a, var(--bg) 60%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    h1, h2, h3 { margin: 0 0 8px; }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+      grid-template-columns: 1.15fr 1fr;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, #1d2332, #151a26);
+      border: 1px solid #2c3246;
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.3);
+    }
+
+    .resource {
+      display: inline-block;
+      margin-right: 12px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #242a3c;
+      border: 1px solid #333b52;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .girl-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .girl-item {
+      display: grid;
+      grid-template-columns: 72px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      border-radius: 14px;
+      border: 1px solid #30374d;
+      background: #1b2030;
+      padding: 10px;
+      cursor: pointer;
+      transition: border-color .2s ease;
+    }
+
+    .girl-item.active,
+    .girl-item:hover { border-color: var(--accent-2); }
+
+    .thumb {
+      width: 72px;
+      height: 72px;
+      border-radius: 12px;
+      object-fit: cover;
+      background: #2a3044;
+    }
+
+    .xp {
+      height: 9px;
+      border-radius: 999px;
+      background: #2e364f;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .xp > span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(130px, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    button {
+      border: 0;
+      background: #2a3249;
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover { filter: brightness(1.12); }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+
+    .primary { background: linear-gradient(90deg, var(--accent), #f866b3); }
+
+    .wardrobe-grid {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .outfit {
+      border: 1px solid #36405a;
+      border-radius: 12px;
+      padding: 10px;
+      background: #20283a;
+    }
+
+    .outfit.locked { opacity: .5; }
+
+    .tag {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 12px;
+      border-radius: 999px;
+      padding: 5px 8px;
+      background: #2a3249;
+      color: var(--muted);
+    }
+
+    .log {
+      margin-top: 12px;
+      max-height: 180px;
+      overflow: auto;
+      font-size: 14px;
+      color: var(--muted);
+      border-top: 1px solid #2e3550;
+      padding-top: 10px;
+    }
+
+    .small { color: var(--muted); font-size: 14px; }
+
+    @media (max-width: 930px) {
+      .container { grid-template-columns: 1fr; }
+      .actions { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="panel">
+      <h1>Relationship Level-Up</h1>
+      <p class="small">Build trust with each character, unlock outfit tiers, and collect all galleries.</p>
+
+      <div>
+        <span class="resource" id="coins">Coins: 120</span>
+        <span class="resource" id="energy">Energy: 10</span>
+      </div>
+
+      <div class="girl-list" id="girlList"></div>
+    </section>
+
+    <section class="panel" id="detailPanel">
+      <h2 id="detailName">Select a character</h2>
+      <p class="small" id="detailDesc">Choose someone on the left to start leveling up your relationship.</p>
+
+      <div class="actions">
+        <button id="btnChat">Chat (+8 XP)</button>
+        <button id="btnGift">Gift (+18 XP, -20 coins)</button>
+        <button id="btnDate" class="primary">Date (+35 XP, -2 energy)</button>
+      </div>
+
+      <h3 style="margin-top: 18px;">Wardrobe Unlocks</h3>
+      <div class="wardrobe-grid" id="wardrobe"></div>
+
+      <div class="log" id="log"></div>
+    </section>
+  </div>
+
+  <script>
+    const state = {
+      coins: 120,
+      energy: 10,
+      selected: 0,
+      girls: [
+        {
+          name: "Rina",
+          mood: "Style lover and street-fashion creator",
+          img: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=300&q=80&auto=format&fit=crop",
+          xp: 0,
+          level: 1,
+          outfits: [
+            { name: "Casual Day", levelReq: 1, unlocked: true },
+            { name: "City Night", levelReq: 3, unlocked: false },
+            { name: "Event Glam", levelReq: 5, unlocked: false },
+            { name: "Legend Set", levelReq: 8, unlocked: false },
+          ],
+        },
+        {
+          name: "Mika",
+          mood: "Café explorer with an artsy vibe",
+          img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&q=80&auto=format&fit=crop",
+          xp: 0,
+          level: 1,
+          outfits: [
+            { name: "Cozy Knit", levelReq: 1, unlocked: true },
+            { name: "Weekend Denim", levelReq: 2, unlocked: false },
+            { name: "Gallery Look", levelReq: 4, unlocked: false },
+            { name: "Premium Couture", levelReq: 7, unlocked: false },
+          ],
+        },
+        {
+          name: "Elena",
+          mood: "Fitness + travel content creator",
+          img: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=300&q=80&auto=format&fit=crop",
+          xp: 0,
+          level: 1,
+          outfits: [
+            { name: "Daily Fit", levelReq: 1, unlocked: true },
+            { name: "Summer Vibe", levelReq: 3, unlocked: false },
+            { name: "Resort Style", levelReq: 5, unlocked: false },
+            { name: "Signature Icon", levelReq: 8, unlocked: false },
+          ],
+        },
+      ],
+      log: ["Welcome! Pick a character and start building your relationship."]
+    };
+
+    const girlList = document.getElementById('girlList');
+    const wardrobe = document.getElementById('wardrobe');
+    const detailName = document.getElementById('detailName');
+    const detailDesc = document.getElementById('detailDesc');
+    const coinsEl = document.getElementById('coins');
+    const energyEl = document.getElementById('energy');
+    const logEl = document.getElementById('log');
+
+    const xpForNext = (level) => level * 70;
+
+    function renderList() {
+      girlList.innerHTML = '';
+      state.girls.forEach((g, idx) => {
+        const next = xpForNext(g.level);
+        const pct = Math.min(100, Math.floor((g.xp / next) * 100));
+        const item = document.createElement('div');
+        item.className = `girl-item ${idx === state.selected ? 'active' : ''}`;
+        item.innerHTML = `
+          <img class="thumb" src="${g.img}" alt="${g.name}" />
+          <div>
+            <strong>${g.name}</strong>
+            <div class="small">Level ${g.level} · ${g.mood}</div>
+            <div class="xp"><span style="width:${pct}%"></span></div>
+          </div>
+          <div class="small">${g.xp}/${next} XP</div>
+        `;
+        item.onclick = () => {
+          state.selected = idx;
+          render();
+        };
+        girlList.appendChild(item);
+      });
+    }
+
+    function renderDetail() {
+      const g = state.girls[state.selected];
+      detailName.textContent = `${g.name} · Level ${g.level}`;
+      detailDesc.textContent = g.mood;
+      wardrobe.innerHTML = '';
+
+      g.outfits.forEach((o) => {
+        const card = document.createElement('div');
+        card.className = `outfit ${o.unlocked ? '' : 'locked'}`;
+        card.innerHTML = `
+          <strong>${o.name}</strong>
+          <div class="tag">${o.unlocked ? 'Unlocked' : `Unlock at Level ${o.levelReq}`}</div>
+        `;
+        wardrobe.appendChild(card);
+      });
+    }
+
+    function renderLog() {
+      logEl.innerHTML = state.log.slice(-9).map(m => `<div>• ${m}</div>`).join('');
+    }
+
+    function maybeLevelUp(g) {
+      let leveled = false;
+      while (g.xp >= xpForNext(g.level)) {
+        g.xp -= xpForNext(g.level);
+        g.level += 1;
+        leveled = true;
+      }
+      if (leveled) {
+        g.outfits.forEach(o => {
+          if (!o.unlocked && g.level >= o.levelReq) {
+            o.unlocked = true;
+            state.log.push(`${g.name} unlocked outfit: ${o.name}`);
+          }
+        });
+        state.log.push(`${g.name} reached Level ${g.level}!`);
+      }
+    }
+
+    function gainXP(amount, action) {
+      const g = state.girls[state.selected];
+      g.xp += amount;
+      maybeLevelUp(g);
+      state.log.push(`${action} with ${g.name}: +${amount} XP`);
+      render();
+    }
+
+    document.getElementById('btnChat').onclick = () => {
+      if (state.energy <= 0) return alert('No energy left.');
+      state.energy -= 1;
+      gainXP(8, 'Chat');
+    };
+
+    document.getElementById('btnGift').onclick = () => {
+      if (state.coins < 20) return alert('Not enough coins.');
+      state.coins -= 20;
+      gainXP(18, 'Gift');
+    };
+
+    document.getElementById('btnDate').onclick = () => {
+      if (state.energy < 2) return alert('Need 2 energy for a date.');
+      state.energy -= 2;
+      gainXP(35, 'Date');
+    };
+
+    function renderResources() {
+      coinsEl.textContent = `Coins: ${state.coins}`;
+      energyEl.textContent = `Energy: ${state.energy}`;
+    }
+
+    function render() {
+      renderResources();
+      renderList();
+      renderDetail();
+      renderLog();
+    }
+
+    render();
+  </script>
+</body>
+</html>
